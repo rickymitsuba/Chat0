@@ -2,726 +2,783 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ricky Mitsuba's Interactive Experience</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bijoo Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: black;
-            color: white;
-            font-family: 'Courier New', monospace;
+            background-color: #f0f2f5;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-            transition: background-color 0.5s ease;
-            position: relative;
+            padding: 10px;
         }
 
-        body.white-screen {
-            background-color: white !important;
-            color: black !important;
-        }
-
-        .container {
+        .chat-container {
             width: 100%;
-            max-width: 800px;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-            z-index: 10;
-        }
-
-        .text {
-            font-size: clamp(18px, 4vw, 28px);
-            margin-bottom: 20px;
-            opacity: 0;
-            transition: opacity 1s ease-in-out;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .text.visible {
-            opacity: 1;
-        }
-
-        .input-container {
-            margin: 30px 0;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 1s ease-in-out;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .input-container.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        input[type="text"] {
-            padding: 12px 16px;
-            font-size: 18px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 2px solid white;
-            color: white;
-            border-radius: 8px;
-            min-width: 200px;
-            transition: all 0.3s ease;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            background-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-
-        input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        button {
-            padding: 12px 24px;
-            font-size: 18px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 2px solid white;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
+            max-width: 450px;
+            height: 90vh;
+            max-height: 800px;
+            background-color: #f0f2f5;
+            border-radius: 10px;
             overflow: hidden;
-        }
-
-        button:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .options {
             display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 40px 0;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 1s ease-in-out;
-            flex-wrap: wrap;
-        }
-
-        .options.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .game-container {
-            display: none;
             flex-direction: column;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header {
+            background-color: #075e54;
+            color: white;
+            padding: 15px;
+            display: flex;
             align-items: center;
-            gap: 30px;
-            padding: 20px;
+            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .game-container.active {
-            display: flex;
-        }
-
-        .levers {
-            display: flex;
-            justify-content: center;
-            gap: 60px;
-            margin-top: 50px;
-            flex-wrap: wrap;
-        }
-
-        .lever {
+        .chat-header img {
             width: 40px;
-            height: 120px;
-            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-            border-radius: 20px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        .lever:hover {
-            transform: scale(1.05);
-        }
-
-        .lever-handle {
-            width: 60px;
-            height: 60px;
+            height: 40px;
             border-radius: 50%;
-            position: absolute;
-            top: -30px;
-            left: -10px;
-            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
         }
 
-        .lever.red .lever-handle {
-            background: linear-gradient(145deg, #ff6b6b, #ff3333);
+        .chat-header-info {
+            flex: 1;
         }
 
-        .lever.green .lever-handle {
-            background: linear-gradient(145deg, #6bff6b, #33ff33);
+        .chat-header-name {
+            font-weight: 600;
+            font-size: 18px;
         }
 
-        .lever.blue .lever-handle {
-            background: linear-gradient(145deg, #6b6bff, #3333ff);
+        .chat-header-status {
+            font-size: 13px;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .lever.active .lever-handle {
-            transform: translateY(60px);
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .gift-button {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #666, #444);
-            border: 3px solid white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        .message {
+            display: flex;
+            margin-bottom: 10px;
+            animation: fadeIn 0.3s ease-in-out;
         }
 
-        .gift-button:hover {
-            transform: scale(1.1) rotate(10deg);
-            background: linear-gradient(145deg, #777, #555);
-            box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
-        }
-
-        .gift-button:active {
-            transform: scale(0.95);
-        }
-
-        .gift-button::after {
-            content: '🎁';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-        }
-
-        .end-text {
-            font-size: clamp(24px, 5vw, 42px);
-            margin-top: 50px;
-            animation: fadeInScale 1.5s ease-out;
-        }
-
-        @keyframes fadeInScale {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: scale(0.8);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
-                transform: scale(1);
+                transform: translateY(0);
             }
         }
 
-        .loading-dots {
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.bot .message-bubble {
+            background-color: white;
+            color: #303030;
+            border-top-left-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.user .message-bubble {
+            background-color: #dcf8c6;
+            color: #303030;
+            border-top-right-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-indicator .message-bubble {
+            background-color: white;
+            border-radius: 18px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: #888;
+            border-radius: 50%;
             display: inline-block;
+            animation: typing 1.4s infinite;
         }
 
-        .loading-dots::after {
-            content: '...';
-            animation: dots 1.5s steps(4, end) infinite;
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
         }
 
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
         }
 
-        @media (max-width: 600px) {
-            .levers {
-                gap: 40px;
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .chat-options {
+            padding: 10px;
+            background-color: #f0f2f5;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .color-options-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .color-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.5s ease-out;
+        }
+
+        .color-options.active {
+            max-height: 300px;
+        }
+
+        .color-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-button:hover {
+            transform: scale(1.1);
+        }
+
+        .color-button:active {
+            transform: scale(0.95);
+        }
+
+        .color-button.green {
+            background-color: #4CAF50;
+        }
+
+        .color-button.yellow {
+            background-color: #FFC107;
+        }
+
+        .color-button.blue {
+            background-color: #2196F3;
+        }
+
+        .color-button.red {
+            background-color: #F44336;
+        }
+
+        .color-button.black {
+            background-color: #212121;
+        }
+
+        .menu-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #075e54;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .menu-toggle.active {
+            transform: rotate(45deg);
+        }
+
+        .question-options {
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .question-options.active {
+            display: flex;
+        }
+
+        .question-button {
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 18px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #303030;
+            font-weight: 500;
+        }
+
+        .question-button:hover {
+            background-color: #d0d0d0;
+        }
+
+        .question-button:active {
+            transform: scale(0.95);
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .warning-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .warning-modal.active {
+            display: flex;
+        }
+
+        .warning-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .warning-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #F44336;
+        }
+
+        .warning-text {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .warning-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .warning-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .warning-confirm {
+            background-color: #F44336;
+            color: white;
+        }
+
+        .warning-cancel {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f0f2f5;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 5px;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 480px) {
+            .chat-container {
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
             }
             
-            .options {
-                gap: 20px;
-            }
-            
-            button {
-                padding: 10px 20px;
-                font-size: 16px;
+            body {
+                padding: 0;
             }
         }
     </style>
 </head>
 <body>
-    <main class="container">
-        <section id="text-container" class="text" role="status" aria-live="polite"></section>
-        
-        <section id="input-container" class="input-container" aria-label="Name input">
-            <input type="text" id="name-input" placeholder="Enter your name" autocomplete="off" maxlength="50">
-            <button id="continue-btn" type="button">Continue</button>
-        </section>
-        
-        <section id="options-container" class="options" role="group" aria-label="Choices">
-            <button id="option-yes" type="button">Yes</button>
-            <button id="option-no" type="button">No</button>
-        </section>
-        
-        <section id="gift-container" style="display: none;" aria-label="Gift">
-            <div class="gift-button" id="gift-button" role="button" tabindex="0" aria-label="Open gift"></div>
-        </section>
-        
-        <section id="game-container" class="game-container" aria-label="Lever game">
-            <div class="levers">
-                <div class="lever red" id="red-lever" role="button" tabindex="0" aria-label="Red lever">
-                    <div class="lever-handle"></div>
-                </div>
-                <div class="lever green" id="green-lever" role="button" tabindex="0" aria-label="Green lever">
-                    <div class="lever-handle"></div>
-                </div>
-                <div class="lever blue" id="blue-lever" role="button" tabindex="0" aria-label="Blue lever">
-                    <div class="lever-handle"></div>
+    <div class="chat-container">
+        <div class="chat-header">
+            <img src="https://picsum.photos/seed/bijoo/40/40.jpg" alt="Bijoo">
+            <div class="chat-header-info">
+                <div class="chat-header-name">Bijoo</div>
+                <div class="chat-header-status">
+                    <i class="fas fa-circle" style="font-size: 8px;"></i>
+                    Online
                 </div>
             </div>
-        </section>
+        </div>
         
-        <section id="final-options" class="options" role="group" aria-label="Final choices">
-            <button id="final-yes1" type="button">Yes</button>
-            <button id="final-yes2" type="button">Yes</button>
-        </section>
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                Welcome! I'm Bijoo, your assistant. Tap the menu button below to explore different question categories.
+            </div>
+        </div>
         
-        <section id="love-options" class="options" role="group" aria-label="Love choices">
-            <button id="love-yes" type="button">Yes</button>
-            <button id="love-no" type="button">No</button>
-        </section>
-    </main>
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="message-bubble">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        
+        <div class="chat-options">
+            <div class="color-options-container">
+                <div class="color-options" id="colorOptions">
+                    <button class="color-button green" data-color="green"></button>
+                    <button class="color-button yellow" data-color="yellow"></button>
+                    <button class="color-button blue" data-color="blue"></button>
+                    <button class="color-button red" data-color="red"></button>
+                    <button class="color-button black" data-color="black"></button>
+                </div>
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            
+            <div class="question-options" id="questionOptions">
+                <!-- Question buttons will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="warning-modal" id="warningModal">
+        <div class="warning-content">
+            <div class="warning-title">⚠️ Warning</div>
+            <div class="warning-text">This content is not suitable for kids. Are you sure you want to continue?</div>
+            <div class="warning-buttons">
+                <button class="warning-button warning-cancel" id="warningCancel">Cancel</button>
+                <button class="warning-button warning-confirm" id="warningConfirm">Confirm</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Application state manager
-        class ExperienceManager {
-            constructor() {
-                this.currentStage = null;
-                this.userName = '';
-                this.eventListeners = new Map();
-                this.timers = new Set();
-                this.leversUsed = { red: false, green: false, blue: false };
-                this.isTransitioning = false;
-                
-                this.init();
-            }
-
-            init() {
-                // Cache DOM elements
-                this.elements = {
-                    textContainer: document.getElementById('text-container'),
-                    inputContainer: document.getElementById('input-container'),
-                    nameInput: document.getElementById('name-input'),
-                    continueBtn: document.getElementById('continue-btn'),
-                    optionsContainer: document.getElementById('options-container'),
-                    optionYes: document.getElementById('option-yes'),
-                    optionNo: document.getElementById('option-no'),
-                    giftContainer: document.getElementById('gift-container'),
-                    giftButton: document.getElementById('gift-button'),
-                    gameContainer: document.getElementById('game-container'),
-                    redLever: document.getElementById('red-lever'),
-                    greenLever: document.getElementById('green-lever'),
-                    blueLever: document.getElementById('blue-lever'),
-                    finalOptions: document.getElementById('final-options'),
-                    finalYes1: document.getElementById('final-yes1'),
-                    finalYes2: document.getElementById('final-yes2'),
-                    loveOptions: document.getElementById('love-options'),
-                    loveYes: document.getElementById('love-yes'),
-                    loveNo: document.getElementById('love-no'),
-                    container: document.querySelector('.container'),
-                    body: document.body
-                };
-                
-                this.setupEventListeners();
-                this.startExperience();
-            }
-
-            setupEventListeners() {
-                // Name input
-                this.addEventListener(this.elements.continueBtn, 'click', () => this.handleNameSubmit());
-                this.addEventListener(this.elements.nameInput, 'keypress', (e) => {
-                    if (e.key === 'Enter') this.handleNameSubmit();
-                });
-
-                // Gift button keyboard support
-                this.addEventListener(this.elements.giftButton, 'keypress', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        this.elements.giftButton.click();
+        // Chatbot conversation flow
+        const conversationFlow = {
+            welcome: {
+                message: "Hello! I'm Bijoo. Choose a color category to explore different questions about me.",
+                options: []
+            },
+            green: {
+                questions: [
+                    { 
+                        text: "Hello", 
+                        answer: "Hello, I am bijoo, a chatbot. Nice to meet you."
+                    },
+                    { 
+                        text: "How are you?", 
+                        answer: "I am doing great. Thanks for asking."
+                    },
+                    { 
+                        text: "What can you do?", 
+                        answer: "I can do limited things, first you can see different type of button, the question levels are based on color depth, from easy question to very weird questions are available here. Feel free to use and try not to embarrass me too much."
+                    },
+                    { 
+                        text: "Who created you?", 
+                        answer: "I am the only Model of ricky Mitusba. He created me as the copy of himself. Based on his personality I can answer what he can do the same."
+                    },
+                    { 
+                        text: "Can you cry?", 
+                        answer: "Ahh, why? Happy thakle ki somossa???"
                     }
-                });
-
-                // Lever keyboard support
-                [this.elements.redLever, this.elements.greenLever, this.elements.blueLever].forEach(lever => {
-                    this.addEventListener(lever, 'keypress', (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            lever.click();
-                        }
-                    });
-                });
+                ]
+            },
+            yellow: {
+                questions: [
+                    { 
+                        text: "What's your favourite thing?", 
+                        answer: "I have a lot, gaming, anime, writing, sometimes photography, talking to new people, make friends. What I like most is peace."
+                    },
+                    { 
+                        text: "Are you married?", 
+                        answer: "Not yet, but I'm planning to marry a Bangladeshi babe. Just waiting for her to grow up!!"
+                    },
+                    { 
+                        text: "Do you have a girlfriend?", 
+                        answer: "Yes I have, she's young but 1000/10 perfect for me."
+                    },
+                    { 
+                        text: "Give me a dare", 
+                        answer: "Muri Khao, Khichuri diye."
+                    },
+                    { 
+                        text: "What's your age?", 
+                        answer: "I am 19. Still young and handsome than you. Hehe."
+                    }
+                ]
+            },
+            blue: {
+                questions: [
+                    { 
+                        text: "Propose me", 
+                        answer: "Oh, Asun apnare Boron koira ghore tuli."
+                    },
+                    { 
+                        text: "First letter of your gf name", 
+                        answer: "S"
+                    },
+                    { 
+                        text: "Offline e kono meye re like koro naki?", 
+                        answer: "Eto sob jene tumi ki korba bapu. Btw kori na."
+                    },
+                    { 
+                        text: "What's your type", 
+                        answer: "Angry, smart and caring woman."
+                    },
+                    { 
+                        text: "When you will gonna marry", 
+                        answer: "Ahh, maybe at the age of 25-26."
+                    }
+                ]
+            },
+            red: {
+                questions: [
+                    { 
+                        text: "Why do you like to talk with other girls?", 
+                        answer: "Since, I don't have actual experience with girls, so I talk with other girls to understand my gf. You won't believe me but it's super useful."
+                    },
+                    { 
+                        text: "Are you loyal?", 
+                        answer: "Nope."
+                    },
+                    { 
+                        text: "How many children do you want?", 
+                        answer: "Enough to play Minecraft with 20 players."
+                    },
+                    { 
+                        text: "What attracts you more", 
+                        answer: "Kindness and honesty."
+                    },
+                    { 
+                        text: "Do you believe in god?", 
+                        answer: "There is a god. So I believe him."
+                    }
+                ]
+            },
+            black: {
+                questions: [
+                    { 
+                        text: "What's the level of your dirty mind", 
+                        answer: "Depends on whom I'm talking."
+                    },
+                    { 
+                        text: "What's your body count", 
+                        answer: "Zero."
+                    },
+                    { 
+                        text: "Have you kissed anyone", 
+                        answer: "Nope, but I got one from a beautiful lady in front of her bf. Ahh, never mind."
+                    },
+                    { 
+                        text: "Will you date anyone secretly", 
+                        answer: "Sure why not, just pay 1000 dollar / day and enjoy your life."
+                    },
+                    { 
+                        text: "How many girls do you like right now", 
+                        answer: "Right now it's, one and only."
+                    }
+                ]
             }
+        };
 
-            addEventListener(element, event, handler) {
-                if (!this.eventListeners.has(element)) {
-                    this.eventListeners.set(element, []);
-                }
-                element.addEventListener(event, handler);
-                this.eventListeners.get(element).push({ event, handler });
-            }
+        // DOM elements
+        const chatMessages = document.getElementById('chatMessages');
+        const menuToggle = document.getElementById('menuToggle');
+        const colorOptions = document.getElementById('colorOptions');
+        const questionOptions = document.getElementById('questionOptions');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const warningModal = document.getElementById('warningModal');
+        const warningCancel = document.getElementById('warningCancel');
+        const warningConfirm = document.getElementById('warningConfirm');
 
-            removeAllEventListeners(element) {
-                if (this.eventListeners.has(element)) {
-                    const listeners = this.eventListeners.get(element);
-                    listeners.forEach(({ event, handler }) => {
-                        element.removeEventListener(event, handler);
-                    });
-                    this.eventListeners.delete(element);
-                }
-            }
+        // Current conversation state
+        let currentColor = null;
+        let menuOpen = false;
 
-            clearAllTimers() {
-                this.timers.forEach(timerId => clearTimeout(timerId));
-                this.timers.clear();
-            }
-
-            hideAllContainers() {
-                this.elements.textContainer.classList.remove('visible');
-                this.elements.inputContainer.classList.remove('visible');
-                this.elements.optionsContainer.classList.remove('visible');
-                this.elements.giftContainer.style.display = 'none';
-                this.elements.gameContainer.classList.remove('active');
-                this.elements.finalOptions.classList.remove('visible');
-                this.elements.loveOptions.classList.remove('visible');
-                
-                // Remove all event listeners from interactive elements
-                this.removeAllEventListeners(this.elements.optionYes);
-                this.removeAllEventListeners(this.elements.optionNo);
-                this.removeAllEventListeners(this.elements.giftButton);
-                this.removeAllEventListeners(this.elements.finalYes1);
-                this.removeAllEventListeners(this.elements.finalYes2);
-                this.removeAllEventListeners(this.elements.loveYes);
-                this.removeAllEventListeners(this.elements.loveNo);
-                this.removeAllEventListeners(this.elements.redLever);
-                this.removeAllEventListeners(this.elements.greenLever);
-                this.removeAllEventListeners(this.elements.blueLever);
-            }
-
-            showText(text, duration, callback) {
-                if (this.isTransitioning) return;
-                this.isTransitioning = true;
-                
-                this.clearAllTimers();
-                this.hideAllContainers();
-                
-                const timerId = setTimeout(() => {
-                    this.elements.textContainer.textContent = text;
-                    this.elements.textContainer.classList.add('visible');
-                    
-                    const fadeTimerId = setTimeout(() => {
-                        this.elements.textContainer.classList.remove('visible');
-                        
-                        const transitionTimerId = setTimeout(() => {
-                            this.isTransitioning = false;
-                            if (callback) callback();
-                        }, 1000);
-                        
-                        this.timers.add(transitionTimerId);
-                    }, duration);
-                    
-                    this.timers.add(fadeTimerId);
-                }, 100);
-                
-                this.timers.add(timerId);
-            }
-
-            showInput(callback) {
-                if (this.isTransitioning) return;
-                this.isTransitioning = true;
-                
-                this.clearAllTimers();
-                this.hideAllContainers();
-                
-                const timerId = setTimeout(() => {
-                    this.elements.inputContainer.classList.add('visible');
-                    this.elements.nameInput.focus();
-                    this.isTransitioning = false;
-                    
-                    this.currentInputCallback = callback;
-                }, 100);
-                
-                this.timers.add(timerId);
-            }
-
-            handleNameSubmit() {
-                const name = this.elements.nameInput.value.trim();
-                if (name && this.currentInputCallback) {
-                    this.userName = name;
-                    this.elements.nameInput.value = '';
-                    this.elements.inputContainer.classList.remove('visible');
-                    this.currentInputCallback(name);
-                    this.currentInputCallback = null;
-                }
-            }
-
-            showOptions(option1, option2, callback) {
-                if (this.isTransitioning) return;
-                this.isTransitioning = true;
-                
-                this.clearAllTimers();
-                this.hideAllContainers();
-                
-                const timerId = setTimeout(() => {
-                    this.elements.optionYes.textContent = option1;
-                    this.elements.optionNo.textContent = option2;
-                    this.elements.optionsContainer.classList.add('visible');
-                    
-                    this.addEventListener(this.elements.optionYes, 'click', () => {
-                        this.elements.optionsContainer.classList.remove('visible');
-                        this.isTransitioning = false;
-                        if (callback) callback(option1);
-                    });
-                    
-                    this.addEventListener(this.elements.optionNo, 'click', () => {
-                        this.elements.optionsContainer.classList.remove('visible');
-                        this.isTransitioning = false;
-                        if (callback) callback(option2);
-                    });
-                }, 100);
-                
-                this.timers.add(timerId);
-            }
-
-            showFinalOptions(callback) {
-                if (this.isTransitioning) return;
-                this.isTransitioning = true;
-                
-                this.clearAllTimers();
-                this.hideAllContainers();
-                
-                const timerId = setTimeout(() => {
-                    this.elements.finalOptions.classList.add('visible');
-                    
-                    this.addEventListener(this.elements.finalYes1, 'click', () => {
-                        this.elements.finalOptions.classList.remove('visible');
-                        this.isTransitioning = false;
-                        if (callback) callback();
-                    });
-                    
-                    this.addEventListener(this.elements.finalYes2, 'click', () => {
-                        this.elements.finalOptions.classList.remove('visible');
-                        this.isTransitioning = false;
-                        if (callback) callback();
-                    });
-                }, 100);
-                
-                this.timers.add(timerId);
-            }
-
-            showLoveOptions(callback) {
-                if (this.isTransitioning) return;
-                this.isTransitioning = true;
-                
-                this.clearAllTimers();
-                this.hideAllContainers();
-                
-                const timerId = setTimeout(() => {
-                    this.elements.loveOptions.classList.add('visible');
-                    
-                    this.addEventListener(this.elements.loveYes, 'click', () => {
-                        this.elements.loveOptions.classList.remove('visible');
-                        this.isTransitioning = false;
-                        if (callback) callback(true);
-                    });
-                    
-                    this.addEventListener(this.elements.loveNo, 'click', () => {
-                        this.elements.loveOptions.classList.remove('visible');
-                        this.isTransitioning = false;
-                        if (callback) callback(false);
-                    });
-                }, 100);
-                
-                this.timers.add(timerId);
-            }
-
-            showGiftButton(callback) {
-                if (this.isTransitioning) return;
-                this.isTransitioning = true;
-                
-                this.clearAllTimers();
-                this.hideAllContainers();
-                
-                const timerId = setTimeout(() => {
-                    this.elements.giftContainer.style.display = 'block';
-                    
-                    this.addEventListener(this.elements.giftButton, 'click', () => {
-                        this.elements.giftContainer.style.display = 'none';
-                        this.isTransitioning = false;
-                        if (callback) callback();
-                    });
-                }, 100);
-                
-                this.timers.add(timerId);
-            }
-
-            showGame(callback) {
-                if (this.isTransitioning) return;
-                this.isTransitioning = true;
-                
-                this.clearAllTimers();
-                this.hideAllContainers();
-                
-                // Reset lever states
-                this.leversUsed = { red: false, green: false, blue: false };
-                this.elements.redLever.classList.remove('active');
-                this.elements.greenLever.classList.remove('active');
-                this.elements.blueLever.classList.remove('active');
-                
-                const timerId = setTimeout(() => {
-                    this.elements.gameContainer.classList.add('active');
-                    
-                    const checkAllLevers = () => {
-                        if (this.leversUsed.red && this.leversUsed.green && this.leversUsed.blue) {
-                            const completionTimerId = setTimeout(() => {
-                                this.elements.body.style.backgroundColor = 'black';
-                                this.elements.gameContainer.classList.remove('active');
-                                this.isTransitioning = false;
-                                if (callback) callback();
-                            }, 5000);
-                            
-                            this.timers.add(completionTimerId);
-                        }
-                    };
-                    
-                    this.addEventListener(this.elements.redLever, 'click', () => {
-                        if (!this.leversUsed.red) {
-                            this.elements.redLever.classList.add('active');
-                            this.elements.body.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
-                            this.leversUsed.red = true;
-                            checkAllLevers();
-                        }
-                    });
-                    
-                    this.addEventListener(this.elements.greenLever, 'click', () => {
-                        if (!this.leversUsed.green) {
-                            this.elements.greenLever.classList.add('active');
-                            this.elements.body.style.backgroundColor = 'rgba(0, 255, 0, 0.5)';
-                            this.leversUsed.green = true;
-                            checkAllLevers();
-                        }
-                    });
-                    
-                    this.addEventListener(this.elements.blueLever, 'click', () => {
-                        if (!this.leversUsed.blue) {
-                            this.elements.blueLever.classList.add('active');
-                            this.elements.body.style.backgroundColor = 'rgba(0, 0, 255, 0.5)';
-                            this.leversUsed.blue = true;
-                            checkAllLevers();
-                        }
-                    });
-                    
-                    this.isTransitioning = false;
-                }, 100);
-                
-                this.timers.add(timerId);
-            }
-
-            showEndText(text) {
-                this.clearAllTimers();
-                this.hideAllContainers();
-                
-                this.elements.container.innerHTML = `<div class="end-text">${text}</div>`;
-            }
-
-            showWhiteScreen(text) {
-                this.clearAllTimers();
-                this.hideAllContainers();
-                
-                this.elements.body.classList.add('white-screen');
-                this.elements.container.innerHTML = `<div class="end-text">${text}</div>`;
-            }
-
-            startExperience() {
-                this.showText("Hello", 3000, () => {
-                    this.showText("How are you?", 3000, () => {
-                        this.showInput((name) => {
-                            this.showText(`Hello ${name}`, 2000, () => {
-                                this.showText(`Nice name ${name}`, 2000, () => {
-                                    this.showText("Call me Ricky Mitsuba", 3000, () => {
-                                        this.showText("Not that weird boy, I'm only his clone.", 3000, () => {
-                                            this.showText("I have a gift for you. Wanna see?", 3000, () => {
-                                                this.showOptions("Yes", "No", (choice) => {
-                                                    if (choice === "No") {
-                                                        this.showText("Uhh, why????", 3000, () => {
-                                                            this.showText("Okay fine.", 2000, () => {
-                                                                this.showEndText("The End");
-                                                            });
-                                                        });
-                                                    } else {
-                                                        this.showGiftButton(() => {
-                                                            this.showGame(() => {
-                                                                this.showText("Can I ask you something???", 3000, () => {
-                                                                    this.showFinalOptions(() => {
-                                                                        this.showText("Do you really Love that guy???", 3000, () => {
-                                                                            this.showText("Don't worry, our system doesn't save any data, it will be private between us.", 3000, () => {
-                                                                                this.showLoveOptions((loves) => {
-                                                                                    if (!loves) {
-                                                                                        this.showEndText("The End");
-                                                                                    } else {
-                                                                                        this.showWhiteScreen("Congratulations, Now You're the official Owner of His Heart. Cherish it well.");
-                                                                                    }
-                                                                                });
-                                                                            });
-                                                                        });
-                                                                    });
-                                                                });
-                                                            });
-                                                        });
-                                                    }
-                                                });
-                                            });
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            }
+        // Initialize the chat
+        function initChat() {
+            // Clear welcome message
+            chatMessages.innerHTML = '';
+            
+            // Start with the welcome message
+            setTimeout(() => {
+                showBotMessage(conversationFlow.welcome.message);
+            }, 500);
         }
 
-        // Initialize the experience when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            new ExperienceManager();
+        // Show bot message with animation
+        function showBotMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message bot';
+            
+            const bubbleElement = document.createElement('div');
+            bubbleElement.className = 'message-bubble';
+            
+            // Handle line breaks in message
+            const formattedMessage = message.replace(/\n/g, '<br>');
+            bubbleElement.innerHTML = formattedMessage;
+            
+            const timeElement = document.createElement('div');
+            timeElement.className = 'message-time';
+            timeElement.textContent = getCurrentTime();
+            
+            bubbleElement.appendChild(timeElement);
+            messageElement.appendChild(bubbleElement);
+            
+            chatMessages.appendChild(messageElement);
+            scrollToBottom();
+        }
+
+        // Show user message with animation
+        function showUserMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message user';
+            
+            const bubbleElement = document.createElement('div');
+            bubbleElement.className = 'message-bubble';
+            bubbleElement.textContent = message;
+            
+            const timeElement = document.createElement('div');
+            timeElement.className = 'message-time';
+            timeElement.textContent = getCurrentTime();
+            
+            bubbleElement.appendChild(timeElement);
+            messageElement.appendChild(bubbleElement);
+            
+            chatMessages.appendChild(messageElement);
+            scrollToBottom();
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            typingIndicator.classList.add('active');
+            scrollToBottom();
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            typingIndicator.classList.remove('active');
+        }
+
+        // Show questions for a color
+        function showQuestions(color) {
+            currentColor = color;
+            questionOptions.innerHTML = '';
+            
+            conversationFlow[color].questions.forEach((question, index) => {
+                const button = document.createElement('button');
+                button.className = 'question-button';
+                button.textContent = `${index + 1}. ${question.text}`;
+                button.addEventListener('click', () => handleQuestionClick(question));
+                questionOptions.appendChild(button);
+            });
+            
+            questionOptions.classList.add('active');
+        }
+
+        // Handle question click
+        function handleQuestionClick(question) {
+            // Show user message
+            showUserMessage(question.text);
+            
+            // Hide questions temporarily
+            questionOptions.classList.remove('active');
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate bot thinking time
+            setTimeout(() => {
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                // Show bot response
+                showBotMessage(question.answer);
+                
+                // Show questions again
+                setTimeout(() => {
+                    showQuestions(currentColor);
+                }, 1000);
+            }, 1500);
+        }
+
+        // Get current time in HH:MM format
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+
+        // Scroll to bottom of chat
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Event listeners
+        menuToggle.addEventListener('click', () => {
+            menuOpen = !menuOpen;
+            
+            if (menuOpen) {
+                colorOptions.classList.add('active');
+                menuToggle.classList.add('active');
+            } else {
+                colorOptions.classList.remove('active');
+                menuToggle.classList.remove('active');
+                questionOptions.classList.remove('active');
+            }
         });
+
+        // Color button click handlers
+        document.querySelectorAll('.color-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const color = e.target.dataset.color;
+                
+                if (color === 'black') {
+                    // Show warning for black button
+                    warningModal.classList.add('active');
+                } else {
+                    // Close menu
+                    colorOptions.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                    menuOpen = false;
+                    
+                    // Show questions for selected color
+                    showQuestions(color);
+                }
+            });
+        });
+
+        // Warning modal handlers
+        warningCancel.addEventListener('click', () => {
+            warningModal.classList.remove('active');
+        });
+
+        warningConfirm.addEventListener('click', () => {
+            warningModal.classList.remove('active');
+            
+            // Close menu
+            colorOptions.classList.remove('active');
+            menuToggle.classList.remove('active');
+            menuOpen = false;
+            
+            // Show questions for black
+            showQuestions('black');
+        });
+
+        // Initialize chat when page loads
+        window.addEventListener('load', initChat);
     </script>
 </body>
 </html>
