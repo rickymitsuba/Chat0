@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricky Mitsuba's Interactive Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.5s ease;
+            position: relative;
+        }
+
+        body.white-screen {
+            background-color: white !important;
+            color: black !important;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .text {
+            font-size: clamp(18px, 4vw, 28px);
+            margin-bottom: 20px;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .text.visible {
+            opacity: 1;
+        }
+
+        .input-container {
+            margin: 30px 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        input[type="text"] {
+            padding: 12px 16px;
+            font-size: 18px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid white;
+            color: white;
+            border-radius: 8px;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid white;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .options {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease-in-out;
+            flex-wrap: wrap;
+        }
+
+        .options.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .game-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .game-container.active {
+            display: flex;
+        }
+
+        .levers {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 50px;
+            flex-wrap: wrap;
+        }
+
+        .lever {
+            width: 40px;
+            height: 120px;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .lever:hover {
+            transform: scale(1.05);
+        }
+
+        .lever-handle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            position: absolute;
+            top: -30px;
+            left: -10px;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .lever.red .lever-handle {
+            background: linear-gradient(145deg, #ff6b6b, #ff3333);
+        }
+
+        .lever.green .lever-handle {
+            background: linear-gradient(145deg, #6bff6b, #33ff33);
+        }
+
+        .lever.blue .lever-handle {
+            background: linear-gradient(145deg, #6b6bff, #3333ff);
+        }
+
+        .lever.active .lever-handle {
+            transform: translateY(60px);
+        }
+
+        .gift-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #666, #444);
+            border: 3px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .gift-button:hover {
+            transform: scale(1.1) rotate(10deg);
+            background: linear-gradient(145deg, #777, #555);
+            box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+        }
+
+        .gift-button:active {
+            transform: scale(0.95);
+        }
+
+        .gift-button::after {
+            content: '🎁';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+        }
+
+        .end-text {
+            font-size: clamp(24px, 5vw, 42px);
+            margin-top: 50px;
+            animation: fadeInScale 1.5s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        @media (max-width: 600px) {
+            .levers {
+                gap: 40px;
+            }
+            
+            .options {
+                gap: 20px;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <section id="text-container" class="text" role="status" aria-live="polite"></section>
+        
+        <section id="input-container" class="input-container" aria-label="Name input">
+            <input type="text" id="name-input" placeholder="Enter your name" autocomplete="off" maxlength="50">
+            <button id="continue-btn" type="button">Continue</button>
+        </section>
+        
+        <section id="options-container" class="options" role="group" aria-label="Choices">
+            <button id="option-yes" type="button">Yes</button>
+            <button id="option-no" type="button">No</button>
+        </section>
+        
+        <section id="gift-container" style="display: none;" aria-label="Gift">
+            <div class="gift-button" id="gift-button" role="button" tabindex="0" aria-label="Open gift"></div>
+        </section>
+        
+        <section id="game-container" class="game-container" aria-label="Lever game">
+            <div class="levers">
+                <div class="lever red" id="red-lever" role="button" tabindex="0" aria-label="Red lever">
+                    <div class="lever-handle"></div>
+                </div>
+                <div class="lever green" id="green-lever" role="button" tabindex="0" aria-label="Green lever">
+                    <div class="lever-handle"></div>
+                </div>
+                <div class="lever blue" id="blue-lever" role="button" tabindex="0" aria-label="Blue lever">
+                    <div class="lever-handle"></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="final-options" class="options" role="group" aria-label="Final choices">
+            <button id="final-yes1" type="button">Yes</button>
+            <button id="final-yes2" type="button">Yes</button>
+        </section>
+        
+        <section id="love-options" class="options" role="group" aria-label="Love choices">
+            <button id="love-yes" type="button">Yes</button>
+            <button id="love-no" type="button">No</button>
+        </section>
+    </main>
+
+    <script>
+        // Application state manager
+        class ExperienceManager {
+            constructor() {
+                this.currentStage = null;
+                this.userName = '';
+                this.eventListeners = new Map();
+                this.timers = new Set();
+                this.leversUsed = { red: false, green: false, blue: false };
+                this.isTransitioning = false;
+                
+                this.init();
+            }
+
+            init() {
+                // Cache DOM elements
+                this.elements = {
+                    textContainer: document.getElementById('text-container'),
+                    inputContainer: document.getElementById('input-container'),
+                    nameInput: document.getElementById('name-input'),
+                    continueBtn: document.getElementById('continue-btn'),
+                    optionsContainer: document.getElementById('options-container'),
+                    optionYes: document.getElementById('option-yes'),
+                    optionNo: document.getElementById('option-no'),
+                    giftContainer: document.getElementById('gift-container'),
+                    giftButton: document.getElementById('gift-button'),
+                    gameContainer: document.getElementById('game-container'),
+                    redLever: document.getElementById('red-lever'),
+                    greenLever: document.getElementById('green-lever'),
+                    blueLever: document.getElementById('blue-lever'),
+                    finalOptions: document.getElementById('final-options'),
+                    finalYes1: document.getElementById('final-yes1'),
+                    finalYes2: document.getElementById('final-yes2'),
+                    loveOptions: document.getElementById('love-options'),
+                    loveYes: document.getElementById('love-yes'),
+                    loveNo: document.getElementById('love-no'),
+                    container: document.querySelector('.container'),
+                    body: document.body
+                };
+                
+                this.setupEventListeners();
+                this.startExperience();
+            }
+
+            setupEventListeners() {
+                // Name input
+                this.addEventListener(this.elements.continueBtn, 'click', () => this.handleNameSubmit());
+                this.addEventListener(this.elements.nameInput, 'keypress', (e) => {
+                    if (e.key === 'Enter') this.handleNameSubmit();
+                });
+
+                // Gift button keyboard support
+                this.addEventListener(this.elements.giftButton, 'keypress', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.elements.giftButton.click();
+                    }
+                });
+
+                // Lever keyboard support
+                [this.elements.redLever, this.elements.greenLever, this.elements.blueLever].forEach(lever => {
+                    this.addEventListener(lever, 'keypress', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            lever.click();
+                        }
+                    });
+                });
+            }
+
+            addEventListener(element, event, handler) {
+                if (!this.eventListeners.has(element)) {
+                    this.eventListeners.set(element, []);
+                }
+                element.addEventListener(event, handler);
+                this.eventListeners.get(element).push({ event, handler });
+            }
+
+            removeAllEventListeners(element) {
+                if (this.eventListeners.has(element)) {
+                    const listeners = this.eventListeners.get(element);
+                    listeners.forEach(({ event, handler }) => {
+                        element.removeEventListener(event, handler);
+                    });
+                    this.eventListeners.delete(element);
+                }
+            }
+
+            clearAllTimers() {
+                this.timers.forEach(timerId => clearTimeout(timerId));
+                this.timers.clear();
+            }
+
+            hideAllContainers() {
+                this.elements.textContainer.classList.remove('visible');
+                this.elements.inputContainer.classList.remove('visible');
+                this.elements.optionsContainer.classList.remove('visible');
+                this.elements.giftContainer.style.display = 'none';
+                this.elements.gameContainer.classList.remove('active');
+                this.elements.finalOptions.classList.remove('visible');
+                this.elements.loveOptions.classList.remove('visible');
+                
+                // Remove all event listeners from interactive elements
+                this.removeAllEventListeners(this.elements.optionYes);
+                this.removeAllEventListeners(this.elements.optionNo);
+                this.removeAllEventListeners(this.elements.giftButton);
+                this.removeAllEventListeners(this.elements.finalYes1);
+                this.removeAllEventListeners(this.elements.finalYes2);
+                this.removeAllEventListeners(this.elements.loveYes);
+                this.removeAllEventListeners(this.elements.loveNo);
+                this.removeAllEventListeners(this.elements.redLever);
+                this.removeAllEventListeners(this.elements.greenLever);
+                this.removeAllEventListeners(this.elements.blueLever);
+            }
+
+            showText(text, duration, callback) {
+                if (this.isTransitioning) return;
+                this.isTransitioning = true;
+                
+                this.clearAllTimers();
+                this.hideAllContainers();
+                
+                const timerId = setTimeout(() => {
+                    this.elements.textContainer.textContent = text;
+                    this.elements.textContainer.classList.add('visible');
+                    
+                    const fadeTimerId = setTimeout(() => {
+                        this.elements.textContainer.classList.remove('visible');
+                        
+                        const transitionTimerId = setTimeout(() => {
+                            this.isTransitioning = false;
+                            if (callback) callback();
+                        }, 1000);
+                        
+                        this.timers.add(transitionTimerId);
+                    }, duration);
+                    
+                    this.timers.add(fadeTimerId);
+                }, 100);
+                
+                this.timers.add(timerId);
+            }
+
+            showInput(callback) {
+                if (this.isTransitioning) return;
+                this.isTransitioning = true;
+                
+                this.clearAllTimers();
+                this.hideAllContainers();
+                
+                const timerId = setTimeout(() => {
+                    this.elements.inputContainer.classList.add('visible');
+                    this.elements.nameInput.focus();
+                    this.isTransitioning = false;
+                    
+                    this.currentInputCallback = callback;
+                }, 100);
+                
+                this.timers.add(timerId);
+            }
+
+            handleNameSubmit() {
+                const name = this.elements.nameInput.value.trim();
+                if (name && this.currentInputCallback) {
+                    this.userName = name;
+                    this.elements.nameInput.value = '';
+                    this.elements.inputContainer.classList.remove('visible');
+                    this.currentInputCallback(name);
+                    this.currentInputCallback = null;
+                }
+            }
+
+            showOptions(option1, option2, callback) {
+                if (this.isTransitioning) return;
+                this.isTransitioning = true;
+                
+                this.clearAllTimers();
+                this.hideAllContainers();
+                
+                const timerId = setTimeout(() => {
+                    this.elements.optionYes.textContent = option1;
+                    this.elements.optionNo.textContent = option2;
+                    this.elements.optionsContainer.classList.add('visible');
+                    
+                    this.addEventListener(this.elements.optionYes, 'click', () => {
+                        this.elements.optionsContainer.classList.remove('visible');
+                        this.isTransitioning = false;
+                        if (callback) callback(option1);
+                    });
+                    
+                    this.addEventListener(this.elements.optionNo, 'click', () => {
+                        this.elements.optionsContainer.classList.remove('visible');
+                        this.isTransitioning = false;
+                        if (callback) callback(option2);
+                    });
+                }, 100);
+                
+                this.timers.add(timerId);
+            }
+
+            showFinalOptions(callback) {
+                if (this.isTransitioning) return;
+                this.isTransitioning = true;
+                
+                this.clearAllTimers();
+                this.hideAllContainers();
+                
+                const timerId = setTimeout(() => {
+                    this.elements.finalOptions.classList.add('visible');
+                    
+                    this.addEventListener(this.elements.finalYes1, 'click', () => {
+                        this.elements.finalOptions.classList.remove('visible');
+                        this.isTransitioning = false;
+                        if (callback) callback();
+                    });
+                    
+                    this.addEventListener(this.elements.finalYes2, 'click', () => {
+                        this.elements.finalOptions.classList.remove('visible');
+                        this.isTransitioning = false;
+                        if (callback) callback();
+                    });
+                }, 100);
+                
+                this.timers.add(timerId);
+            }
+
+            showLoveOptions(callback) {
+                if (this.isTransitioning) return;
+                this.isTransitioning = true;
+                
+                this.clearAllTimers();
+                this.hideAllContainers();
+                
+                const timerId = setTimeout(() => {
+                    this.elements.loveOptions.classList.add('visible');
+                    
+                    this.addEventListener(this.elements.loveYes, 'click', () => {
+                        this.elements.loveOptions.classList.remove('visible');
+                        this.isTransitioning = false;
+                        if (callback) callback(true);
+                    });
+                    
+                    this.addEventListener(this.elements.loveNo, 'click', () => {
+                        this.elements.loveOptions.classList.remove('visible');
+                        this.isTransitioning = false;
+                        if (callback) callback(false);
+                    });
+                }, 100);
+                
+                this.timers.add(timerId);
+            }
+
+            showGiftButton(callback) {
+                if (this.isTransitioning) return;
+                this.isTransitioning = true;
+                
+                this.clearAllTimers();
+                this.hideAllContainers();
+                
+                const timerId = setTimeout(() => {
+                    this.elements.giftContainer.style.display = 'block';
+                    
+                    this.addEventListener(this.elements.giftButton, 'click', () => {
+                        this.elements.giftContainer.style.display = 'none';
+                        this.isTransitioning = false;
+                        if (callback) callback();
+                    });
+                }, 100);
+                
+                this.timers.add(timerId);
+            }
+
+            showGame(callback) {
+                if (this.isTransitioning) return;
+                this.isTransitioning = true;
+                
+                this.clearAllTimers();
+                this.hideAllContainers();
+                
+                // Reset lever states
+                this.leversUsed = { red: false, green: false, blue: false };
+                this.elements.redLever.classList.remove('active');
+                this.elements.greenLever.classList.remove('active');
+                this.elements.blueLever.classList.remove('active');
+                
+                const timerId = setTimeout(() => {
+                    this.elements.gameContainer.classList.add('active');
+                    
+                    const checkAllLevers = () => {
+                        if (this.leversUsed.red && this.leversUsed.green && this.leversUsed.blue) {
+                            const completionTimerId = setTimeout(() => {
+                                this.elements.body.style.backgroundColor = 'black';
+                                this.elements.gameContainer.classList.remove('active');
+                                this.isTransitioning = false;
+                                if (callback) callback();
+                            }, 5000);
+                            
+                            this.timers.add(completionTimerId);
+                        }
+                    };
+                    
+                    this.addEventListener(this.elements.redLever, 'click', () => {
+                        if (!this.leversUsed.red) {
+                            this.elements.redLever.classList.add('active');
+                            this.elements.body.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
+                            this.leversUsed.red = true;
+                            checkAllLevers();
+                        }
+                    });
+                    
+                    this.addEventListener(this.elements.greenLever, 'click', () => {
+                        if (!this.leversUsed.green) {
+                            this.elements.greenLever.classList.add('active');
+                            this.elements.body.style.backgroundColor = 'rgba(0, 255, 0, 0.5)';
+                            this.leversUsed.green = true;
+                            checkAllLevers();
+                        }
+                    });
+                    
+                    this.addEventListener(this.elements.blueLever, 'click', () => {
+                        if (!this.leversUsed.blue) {
+                            this.elements.blueLever.classList.add('active');
+                            this.elements.body.style.backgroundColor = 'rgba(0, 0, 255, 0.5)';
+                            this.leversUsed.blue = true;
+                            checkAllLevers();
+                        }
+                    });
+                    
+                    this.isTransitioning = false;
+                }, 100);
+                
+                this.timers.add(timerId);
+            }
+
+            showEndText(text) {
+                this.clearAllTimers();
+                this.hideAllContainers();
+                
+                this.elements.container.innerHTML = `<div class="end-text">${text}</div>`;
+            }
+
+            showWhiteScreen(text) {
+                this.clearAllTimers();
+                this.hideAllContainers();
+                
+                this.elements.body.classList.add('white-screen');
+                this.elements.container.innerHTML = `<div class="end-text">${text}</div>`;
+            }
+
+            startExperience() {
+                this.showText("Hello", 3000, () => {
+                    this.showText("How are you?", 3000, () => {
+                        this.showInput((name) => {
+                            this.showText(`Hello ${name}`, 2000, () => {
+                                this.showText(`Nice name ${name}`, 2000, () => {
+                                    this.showText("Call me Ricky Mitsuba", 3000, () => {
+                                        this.showText("Not that weird boy, I'm only his clone.", 3000, () => {
+                                            this.showText("I have a gift for you. Wanna see?", 3000, () => {
+                                                this.showOptions("Yes", "No", (choice) => {
+                                                    if (choice === "No") {
+                                                        this.showText("Uhh, why????", 3000, () => {
+                                                            this.showText("Okay fine.", 2000, () => {
+                                                                this.showEndText("The End");
+                                                            });
+                                                        });
+                                                    } else {
+                                                        this.showGiftButton(() => {
+                                                            this.showGame(() => {
+                                                                this.showText("Can I ask you something???", 3000, () => {
+                                                                    this.showFinalOptions(() => {
+                                                                        this.showText("Do you really Love that guy???", 3000, () => {
+                                                                            this.showText("Don't worry, our system doesn't save any data, it will be private between us.", 3000, () => {
+                                                                                this.showLoveOptions((loves) => {
+                                                                                    if (!loves) {
+                                                                                        this.showEndText("The End");
+                                                                                    } else {
+                                                                                        this.showWhiteScreen("Congratulations, Now You're the official Owner of His Heart. Cherish it well.");
+                                                                                    }
+                                                                                });
+                                                                            });
+                                                                        });
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    }
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            }
+        }
+
+        // Initialize the experience when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new ExperienceManager();
+        });
+    </script>
+</body>
+</html>
